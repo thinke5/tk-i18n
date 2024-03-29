@@ -1,0 +1,111 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parseString base > 你|好，{name|>va(#,'ddd')} 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你|好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var-handle",
+    "value": "name|>va(#,'ddd')",
+    "varName": "name",
+  },
+]
+`;
+
+exports[`parseString base > 你好，{@key} 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var-this",
+    "value": "@key",
+  },
+]
+`;
+
+exports[`parseString base > 你好，{name|..length} 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var-handle",
+    "value": "name|..length",
+    "varName": "name",
+  },
+]
+`;
+
+exports[`parseString base > 你好，{name|>va(#,'ddd')} 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var-handle",
+    "value": "name|>va(#,'ddd')",
+    "varName": "name",
+  },
+]
+`;
+
+exports[`parseString base > 你好，{name} 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var",
+    "value": "name",
+    "varName": "name",
+  },
+]
+`;
+
+exports[`parseString base > 你好，{name}! 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，",
+  },
+  {
+    "toString": [Function],
+    "type": "var",
+    "value": "name",
+    "varName": "name",
+  },
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "!",
+  },
+]
+`;
+
+exports[`parseString base > 你好，世界🌍 1`] = `
+[
+  {
+    "toString": [Function],
+    "type": "text",
+    "value": "你好，世界🌍",
+  },
+]
+`;

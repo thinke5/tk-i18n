@@ -1,0 +1,27 @@
+{
+  "name": "@thinke/i18n",
+  "version": "0.1.8",
+  "description": "针对移动端 H5 的 unocss 配置，更符合个人习惯",
+  "main": "libs/index.cjs",
+  "module": "libs/index.mjs",
+  "types": "libs/index.d.ts",
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "npm_publish": "npm run build && npm version patch && npm publish",
+    "test": "vitest"
+  },
+  "files": [
+    "libs",
+    "README.md"
+  ],
+  "bin": {
+    "wml-i18n": "libs/cli.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.30"
+  }
+}

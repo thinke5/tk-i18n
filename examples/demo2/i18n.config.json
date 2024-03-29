@@ -1,0 +1,6 @@
+{
+  "language": ["zh", "en"],
+  "defaultLanguage": "zh",
+  "inputDir": "messages",
+  "outputDir": "./src/i18n"
+}

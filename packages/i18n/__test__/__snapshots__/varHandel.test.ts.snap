@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VarHaveHandel toString > namestr|..length 1`] = `"\${param.namestr.length}"`;
+
+exports[`VarHaveHandel toString > namestr|..length|.*2 1`] = `"\${param.namestr.length*2}"`;
+
+exports[`VarHaveHandel toString > namestr|>length(#) 1`] = `"\${length(param.namestr)}"`;
+
+exports[`VarHaveHandel toString > namestr|>length(#)|>sum(#) 1`] = `"\${sum(length(param.namestr))}"`;
+
+exports[`VarHaveHandel toString > namestr|>length(#)|>sum(#,2) 1`] = `"\${sum(length(param.namestr),2)}"`;
+
+exports[`VarHaveHandel toString > namestr|>length(#)|>sum(#,2)|..length 1`] = `"\${sum(length(param.namestr),2).length}"`;
+
+exports[`VarHaveHandel toString > namestr|>length(#)|>sum(#,2)|..length|>abs(#) 1`] = `"\${abs(sum(length(param.namestr),2).length)}"`;
+
+exports[`VarThis base > @key 1`] = `"\${key()}"`;
+
+exports[`VarThis base > @key|..lenght 1`] = `"\${key().lenght}"`;
+
+exports[`VarThis base > @key|..lenght|>sum(#) 1`] = `"\${sum(key().lenght)}"`;
+
+exports[`VarThis base > @key|>sum(#) 1`] = `"\${sum(key())}"`;
+
+exports[`VarThis base > @key|>sum(#)|..lenght 1`] = `"\${sum(key()).lenght}"`;
+
+exports[`VarThis base > @name 1`] = `"\${name()}"`;

@@ -1,0 +1,7 @@
+{
+  "name": "eeee",
+  "description": "eeeeeeeeedfdsfsdfdsfdsfds",
+  "em": "hhhh",
+  "arr3": ["hello:{name1}", "hello:{name2}", "hello:{name3}", "!"],
+  "em2": "hh {name} hh"
+}
