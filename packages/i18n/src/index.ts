@@ -1,9 +1,10 @@
-import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { cwd } from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { handleVarsAny } from './json2string';
 import { AllKeys, Config } from './type';
-import { fileURLToPath } from 'node:url';
+import { readJsonFile } from './utils/readJsonFile';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,8 +14,7 @@ export async function run() {
   console.log('start i18n');
 
   const basePath = cwd();
-  const file = await readFile(path.resolve(basePath, 'i18n.config.json'));
-  const config: Config = JSON.parse(file.toString());
+  const config = await readJsonFile<Config>(basePath, 'i18n.config');
   const { language, defaultLanguage, inputDir = measageDir, outputDir = './src/i18n' } = config;
 
   if (!language) {
@@ -32,16 +32,8 @@ export async function run() {
   const allKeys: AllKeys = {};
   // cin
   for (const lang of language) {
-    const filePath = path.resolve(basePath, inputDir, `${lang}.json`);
-    const file = await readFile(filePath).catch((err) => {
-      if (err.errno === -2) {
-        console.error('!!! file not found: ' + filePath);
-      }
-    });
-    let json: { [key: string]: string } = {};
-    if (file) {
-      json = JSON.parse(file.toString());
-    }
+    const json = await readJsonFile<{ [key: string]: string }>(path.resolve(basePath, inputDir), lang);
+
     Object.entries(json).map(([key, value]) => {
       const v = handleVarsAny(value); // 处理字符串
       // 统计数据
@@ -110,12 +102,13 @@ function toMainMsg(param: {
     ...param.language.map(
       (lang) => ` * @lang_${lang} \`\`\`\n * ${JSON.stringify(param.allKeys[param.key][lang]?.raw)}\n * \`\`\``
     ),
-    hasVar ? ` * @param {{ ${param.vars.map((v) => v + ': any;').join(' ')} }} param` : ' * @param { {} } [param]',
-    ` * @param {{ languageTag?: ${param.language.map((l) => `"${l}"`).join('|')} }} options`,
+    ' *',
+    varsTmpString(param.vars),
+    ` * @param {{ lang?: ${param.language.map((l) => `"${l}"`).join('|')} }} options`,
     ' */',
     '/* @__NO_SIDE_EFFECTS__ */',
     `export const ${param.key} = (param, options = {}) => {`,
-    '  const lang = options.languageTag || currentLanguage();',
+    '  const lang = options.lang || currentLanguage();',
     param.language.map((l) => `  if (lang === "${l}") return ${l}.${param.key}(${hasVar ? 'param' : ''});`).join('\n'),
     `  return ${param.defaultLanguage}.${param.key}(${hasVar ? 'param' : ''});`,
     '};',
@@ -131,7 +124,8 @@ function toLangMsg(param: { value: string; vars: string[]; key: string }) {
     '/** ```js',
     ' * ' + JSON.stringify(param.value),
     ' * ```',
-    hasVar ? ` * @param {{ ${param.vars.map((v) => v + ': any;').join(' ')} }} param` : '',
+    ' *',
+    varsTmpString(param.vars),
     ' */',
     '/* @__NO_SIDE_EFFECTS__ */',
     `export const ${param.key} = (${hasVar ? 'param' : ''}) => ${param.value};`,
@@ -144,7 +138,7 @@ const eslint_disable = '/* eslint-disable */\n';
 async function writeMainMsg(_path: string, str: string) {
   writeFile(path.resolve(_path, `../.gitignore`), '*');
   writeFile(path.resolve(_path, `../.prettierignore`), '*');
-  ['index.mjs', 'index.d.ts'].forEach((v) =>
+  ['index.mjs', 'index.d.ts', 'message.d.ts', 'runtime.d.ts'].forEach((v) =>
     copyFile(path.resolve(__dirname, './files/', v), path.resolve(_path, `../`, v))
   );
 
@@ -157,4 +151,12 @@ async function writeLangMsg(_path: string, msgs: { [lang: string]: string }) {
     const msgFilePath = path.resolve(_path, `${lang}.mjs`);
     await writeFile(msgFilePath, eslint_disable + str);
   }
+}
+
+function varsTmpString(vars: string[]) {
+  const hasVar = vars.length > 0;
+  return [
+    hasVar ? ` * @template {{${vars.map((v) => v + ': any;').join(' ')} }} T` : '',
+    hasVar ? ` * @param {T} param` : ' * @param { undefined } [param]',
+  ].join('\n');
 }

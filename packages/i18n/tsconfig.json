@@ -5,7 +5,7 @@
     "checkJs": true,
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": true,
+    // "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -19,6 +19,6 @@
     "sourceMap": true,
     "jsx": "preserve"
   },
-  "exclude": [".git", "**/dist/*", "**/libs/*", "**/node_modules/*", "*.mjs"],
+  "exclude": [".git", "**/dist/*", "**/libs/*", "**/node_modules/*", "src/files/*"],
   "include": [".eslintrc.js", "unocss.config.ts", "src/**/*"]
 }
