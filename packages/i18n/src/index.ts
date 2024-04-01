@@ -158,5 +158,7 @@ function varsTmpString(vars: string[]) {
   return [
     hasVar ? ` * @template {{${vars.map((v) => v + ': any;').join(' ')} }} T` : '',
     hasVar ? ` * @param {T} param` : ' * @param { undefined } [param]',
-  ].join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }

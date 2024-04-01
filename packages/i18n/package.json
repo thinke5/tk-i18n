@@ -1,7 +1,8 @@
 {
   "name": "@thinke/i18n",
-  "version": "0.0.1",
+  "version": "0.0.9",
   "description": "i18n json => mjs",
+  "type": "module",
   "main": "libs/index.cjs",
   "module": "libs/index.mjs",
   "types": "libs/index.d.ts",

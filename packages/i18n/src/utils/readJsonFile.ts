@@ -1,4 +1,4 @@
-import * as json5 from 'json5';
+import json5 from 'json5';
 import { glob } from 'glob';
 import * as path from 'node:path';
 import { readFile } from 'node:fs/promises';
