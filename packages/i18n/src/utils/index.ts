@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 const splitSymbol = "'";
 /** 更好的 split */
 export function splitString(str: string, mark: string) {
@@ -19,4 +21,20 @@ export function splitString(str: string, mark: string) {
   }
 
   return resArr;
+}
+
+/**
+ * 删除文件夹下所有问价及将文件夹下所有文件清空
+ */
+export function emptyDir(path: string) {
+  const files = fs.readdirSync(path);
+  files.forEach((file) => {
+    const filePath = `${path}/${file}`;
+    const stats = fs.statSync(filePath);
+    if (stats.isDirectory()) {
+      emptyDir(filePath);
+    } else {
+      fs.unlinkSync(filePath);
+    }
+  });
 }

@@ -5,17 +5,21 @@ import { fileURLToPath } from 'node:url';
 import { handleVarsAny } from './json2string';
 import { AllKeys, Config } from './type';
 import { readJsonFile } from './utils/readJsonFile';
+import { emptyDir } from './utils';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const measageDir = 'messages';
+const eslint_disable = '/* eslint-disable */\n';
 
 export async function run() {
   console.log('start i18n');
 
   const basePath = cwd();
   const config = await readJsonFile<Config>(basePath, 'i18n.config');
-  const { language, defaultLanguage, inputDir = measageDir, outputDir = './src/i18n' } = config;
+  const { language, defaultLanguage, inputDir = measageDir, outputDir = './src/i18n', dynamicLanguage = [] } = config;
+  /** 是否存在动态增加的语言 */
+  const hasDynamicLanguage = dynamicLanguage.length > 0;
 
   if (!language) {
     console.error('config language is empty');
@@ -25,13 +29,15 @@ export async function run() {
     console.error('config defaultLanguage is empty');
     process.exit(2);
   }
+  const allLanguage = language.concat(...dynamicLanguage);
 
   const langMsgPath = path.resolve(basePath, outputDir, measageDir);
+  emptyDir(langMsgPath);
   await mkdir(langMsgPath, { recursive: true });
 
   const allKeys: AllKeys = {};
   // cin
-  for (const lang of language) {
+  for (const lang of allLanguage) {
     const json = await readJsonFile<{ [key: string]: string }>(path.resolve(basePath, inputDir), lang);
 
     Object.entries(json).map(([key, value]) => {
@@ -47,13 +53,12 @@ export async function run() {
   // handle msg
   const langMsgs: { [lang: string]: string } = {};
   let mainMsgs = [
-    ...language.map((l) => `import * as ${l} from './messages/${l}.mjs';`),
-    "import { currentLanguage } from './runtime.mjs';",
-    '',
+    ...language.map((l) => `import * as ${l} from './${measageDir}/${l}.mjs';`),
+    `import { currentLanguage${hasDynamicLanguage ? ', dynamicLanguage' : ''} } from './runtime.mjs';`,
   ].join('\n');
   Object.entries(allKeys).forEach(([key, value]) => {
     // lang
-    language.forEach((lang) => {
+    allLanguage.forEach((lang) => {
       if (langMsgs[lang] === undefined) {
         langMsgs[lang] = '';
       }
@@ -70,7 +75,7 @@ export async function run() {
     });
     // all
     const allVars = Array.from(new Set(Object.values(value).map((v) => v.vars))).flat();
-    mainMsgs += toMainMsg({ key, language, vars: allVars, allKeys, defaultLanguage });
+    mainMsgs += toMainMsg({ hasDynamicLanguage, key, language, vars: allVars, allKeys, defaultLanguage });
   });
   // 写入 runtime
   readFile(path.resolve(__dirname, './files/runtime.mjs'))
@@ -84,6 +89,7 @@ export async function run() {
   // 写入文件
   writeLangMsg(langMsgPath, langMsgs);
   writeMainMsg(langMsgPath, mainMsgs);
+  writeDynamicLanguage(langMsgPath, dynamicLanguage);
   // end
   console.log('end i18n');
 }
@@ -94,6 +100,7 @@ function toMainMsg(param: {
   language: string[];
   allKeys: AllKeys;
   defaultLanguage: string;
+  hasDynamicLanguage?: boolean;
 }) {
   const hasVar = param.vars.length > 0;
 
@@ -109,8 +116,13 @@ function toMainMsg(param: {
     '/* @__NO_SIDE_EFFECTS__ */',
     `export const ${param.key} = (param, options = {}) => {`,
     '  const lang = options.lang || currentLanguage();',
-    param.language.map((l) => `  if (lang === "${l}") return ${l}.${param.key}(${hasVar ? 'param' : ''});`).join('\n'),
-    `  return ${param.defaultLanguage}.${param.key}(${hasVar ? 'param' : ''});`,
+    // param.language.map((l) => `  if (lang === "${l}") return ${l}.${param.key}(${hasVar ? 'param' : ''});`).join('\n'),
+    // `  return ${param.defaultLanguage}.${param.key}(${hasVar ? 'param' : ''});`,
+    '  const langs = {',
+    param.language.map((l) => `    ${l}: ${l}.${param.key},`).join('\n'),
+    param.hasDynamicLanguage ? `    ...dynamicLanguage('${param.key}'),` : '', // 是否开启 动态增加语言
+    `  };`,
+    `  return (langs[lang] || langs.${param.defaultLanguage})(${hasVar ? 'param' : ''});`,
     '};',
   ]
     .filter(Boolean)
@@ -133,12 +145,25 @@ function toLangMsg(param: { value: string; vars: string[]; key: string }) {
     .filter(Boolean)
     .join('\n');
 }
-const eslint_disable = '/* eslint-disable */\n';
+
+/** 生成动态引入语言的工具函数 */
+async function writeDynamicLanguage(_path: string, dynamicLanguage: string[]) {
+  const str = [
+    //
+    eslint_disable,
+    "import { addDynamicLanguage } from './runtime.mjs';",
+    dynamicLanguage.map(
+      (lang) =>
+        `/** dynamic add language ${lang} */\nexport const addLanguage_${lang} = async () => await import('./${measageDir}/${lang}.mjs').then((value) => addDynamicLanguage('${lang}', value));`
+    ),
+  ].join('\n');
+  writeFile(path.resolve(_path, `../dynamic.mjs`), str);
+}
 
 async function writeMainMsg(_path: string, str: string) {
   writeFile(path.resolve(_path, `../.gitignore`), '*');
   writeFile(path.resolve(_path, `../.prettierignore`), '*');
-  ['index.mjs', 'index.d.ts', 'message.d.ts', 'runtime.d.ts'].forEach((v) =>
+  ['index.mjs', 'index.d.ts', 'message.d.ts', 'runtime.d.ts', 'dynamic.d.ts'].forEach((v) =>
     copyFile(path.resolve(__dirname, './files/', v), path.resolve(_path, `../`, v))
   );
 
@@ -157,7 +182,7 @@ function varsTmpString(vars: string[]) {
   const hasVar = vars.length > 0;
   return [
     hasVar ? ` * @template {{${vars.map((v) => v + ': any;').join(' ')} }} T` : '',
-    hasVar ? ` * @param {T} param` : ' * @param { undefined } [param]',
+    hasVar ? ` * @param {T} param` : ' * @param {{}} [param]',
   ]
     .filter(Boolean)
     .join('\n');

@@ -40,7 +40,7 @@ export const currentLanguage = () => _currentLanguage;
  *
  * @param {AvailableLanguage  | ((lang: AvailableLanguage) => AvailableLanguage )} tag
  */
-export const setLanguageTag = (tag) => {
+export const setLanguage = (tag) => {
   if (typeof tag === 'function') {
     _currentLanguage = tag(_currentLanguage);
   } else {
@@ -56,6 +56,29 @@ export const setLanguageTag = (tag) => {
  */
 export function isAvailableLanguage(thing) {
   return availableLanguage.includes(thing);
+}
+
+/**
+ * @type { {[lang:string]: {[key:string]: Function }} }
+ */
+let _dynamicLanguages = {};
+
+/**
+ * get the dynamic language by key
+ * @param {string} key
+ */
+export function dynamicLanguage(key) {
+  return Object.fromEntries(Object.entries(_dynamicLanguages).map(([lang, value]) => [lang, value[key]]));
+}
+
+/**
+ * add  dynamic language
+ * @param {string} lang
+ * @param {  {[key:string]: Function } } languageData
+ */
+export function addDynamicLanguage(lang, languageData) {
+  _dynamicLanguages[lang] = languageData;
+  availableLanguage.push(lang);
 }
 
 // ------ TYPES ------

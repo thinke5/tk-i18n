@@ -3,4 +3,5 @@
   "defaultLanguage": "zh",
   "inputDir": "messages",
   "outputDir": "./src/i18n"
+  // ,"dynamicLanguage": ["cn"]
 }

@@ -17,8 +17,9 @@ export type VarHandle = {
 export type Config = {
   language: string[];
   defaultLanguage: string;
-  inputDir: string;
-  outputDir: string;
+  inputDir?: string;
+  outputDir?: string;
+  dynamicLanguage?: string[];
 };
 export type KeyVars = { [k: string]: string[] };
 export type AllKeys = { [key: string]: { [lang: string]: KeyValue } };

@@ -1,7 +1,8 @@
 import { createSignal } from 'solid-js';
 import './App.css';
 import solidLogo from './assets/solid.svg';
-import { availableLanguage, i18n, setLanguageTag } from './i18n';
+import { availableLanguage, i18n, setLanguage } from './i18n';
+
 import viteLogo from '/vite.svg';
 
 function App() {
@@ -24,7 +25,8 @@ function App() {
           onClick={() =>
             setCount((count) => {
               const next = count + 1;
-              setLanguageTag(availableLanguage[next % availableLanguage.length]);
+
+              setLanguage(availableLanguage[next % availableLanguage.length]);
               return next;
             })
           }>
