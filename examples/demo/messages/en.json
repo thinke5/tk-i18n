@@ -3,5 +3,6 @@
   "description": "eeeeeeeeedfdsfsdfdsfdsfds",
   "em": "hhhh",
   "arr3": ["hello:{name1}", "hello:{name2}", "hello:{name3}", "!"],
+  "hello2": "max age is {age|>Math.max(99,#)}",
   "em2": "hh {name} hh"
 }

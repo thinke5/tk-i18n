@@ -8,7 +8,7 @@
   "varH": "name.lenght={name|..lenght}",
   "varH22": "name.lenght={name|..lenght|..toFixed(2)}",
   "varH2": "name => {name|>JSON.stringify(#)}",
-  "hello2": "max age is {age|>Math.max(99,#)}",
+  "hello2": "最大年龄 = {age|>Math.max(99,#)}",
   "url1": "/api/user",
   "num": 324,
   "nil": null,

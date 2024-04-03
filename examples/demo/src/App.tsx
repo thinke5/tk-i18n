@@ -1,14 +1,13 @@
 import { createSignal } from 'solid-js';
 import './App.css';
 import solidLogo from './assets/solid.svg';
-import { availableLanguage, i18n, setLanguage } from './i18n';
+import { adapter, defaultLanguage, i18n, setLanguage } from './i18n';
 
 import viteLogo from '/vite.svg';
 
-function App() {
-  const [count, setCount] = createSignal(0);
+adapter(...createSignal(defaultLanguage));
 
-  const t = () => `${i18n.description()} -- ${i18n.name()} count is ${count()}`;
+function App() {
   return (
     <>
       <div>
@@ -21,18 +20,12 @@ function App() {
       </div>
       <h1>Vite + Solid</h1>
       <div class="card">
-        <button
-          onClick={() =>
-            setCount((count) => {
-              const next = count + 1;
-
-              setLanguage(availableLanguage[next % availableLanguage.length]);
-              return next;
-            })
-          }>
-          {t()}
-        </button>
+        <button onClick={() => setLanguage('zh')}>zh</button>
+        <button onClick={() => setLanguage('en')}>en</button>
         <p>{i18n.hello2({ age: 12 })}</p>
+        <p>
+          {i18n.description()} -- {i18n.name()}
+        </p>
       </div>
       <p class="read-the-docs">Click on the Vite and Solid logos to learn more</p>
     </>

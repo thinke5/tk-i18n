@@ -5,6 +5,7 @@ export const defaultLanguage = 'defaultLanguage';
 
 /** The project's available language  */
 export const availableLanguage = /** @type {const} */ (['defaultLanguage']);
+
 /** @type { AvailableLanguage } */
 let _currentLanguage = defaultLanguage;
 
@@ -20,7 +21,7 @@ let _currentLanguage = defaultLanguage;
  *
  * @type {() => AvailableLanguage }
  */
-export const currentLanguage = () => _currentLanguage;
+export let currentLanguage = () => _currentLanguage;
 
 /**
  * Set the language tag.
@@ -40,11 +41,22 @@ export const currentLanguage = () => _currentLanguage;
  *
  * @param {AvailableLanguage  | ((lang: AvailableLanguage) => AvailableLanguage )} tag
  */
-export const setLanguage = (tag) => {
+export let setLanguage = (tag) => {
   if (typeof tag === 'function') {
     _currentLanguage = tag(_currentLanguage);
   } else {
     _currentLanguage = tag;
+  }
+};
+
+/**
+ * @param {()=>string} getFn
+ * @param {(v:string)=>void} [setFn]
+ */
+export const adapter = (getFn, setFn) => {
+  currentLanguage = getFn;
+  if (setFn) {
+    setLanguage = setFn;
   }
 };
 
