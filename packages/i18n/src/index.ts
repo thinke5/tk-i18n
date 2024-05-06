@@ -2,10 +2,11 @@ import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { cwd } from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { getAllLanguageList, getConfig, hasDynamicLanguage as hasDynamicLanguageFn } from './config';
 import { handleVarsAny } from './json2string';
-import { AllKeys, Config } from './type';
-import { readJsonFile } from './utils/readJsonFile';
+import { AllKeys } from './type';
 import { emptyDir } from './utils';
+import { readLangFilesToJson } from './utils/readJsonFile';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -16,20 +17,12 @@ export async function run() {
   console.log('start i18n');
 
   const basePath = cwd();
-  const config = await readJsonFile<Config>(basePath, 'i18n.config');
-  const { language, defaultLanguage, inputDir = measageDir, outputDir = './src/i18n', dynamicLanguage = [] } = config;
-  /** 是否存在动态增加的语言 */
-  const hasDynamicLanguage = dynamicLanguage.length > 0;
 
-  if (!language) {
-    console.error('config language is empty');
-    process.exit(2);
-  }
-  if (!defaultLanguage) {
-    console.error('config defaultLanguage is empty');
-    process.exit(2);
-  }
-  const allLanguage = language.concat(...dynamicLanguage);
+  const { language, defaultLanguage, outputDir = './src/i18n', dynamicLanguage = [] } = await getConfig();
+  /** 是否存在动态增加的语言 */
+  const hasDynamicLanguage = await hasDynamicLanguageFn();
+
+  const allLanguage = await getAllLanguageList();
 
   const langMsgPath = path.resolve(basePath, outputDir, measageDir);
   emptyDir(langMsgPath);
@@ -38,7 +31,7 @@ export async function run() {
   const allKeys: AllKeys = {};
   // cin
   for (const lang of allLanguage) {
-    const json = await readJsonFile<{ [key: string]: string }>(path.resolve(basePath, inputDir), lang);
+    const json = await readLangFilesToJson(lang);
 
     Object.entries(json).map(([key, value]) => {
       const v = handleVarsAny(value); // 处理字符串
@@ -78,7 +71,7 @@ export async function run() {
     mainMsgs += toMainMsg({ hasDynamicLanguage, key, language, vars: allVars, allKeys, defaultLanguage });
   });
   // 写入 runtime
-  readFile(path.resolve(__dirname, './files/runtime.mjs'))
+  readFile(path.resolve(__dirname, '../files/runtime.mjs'))
     .then((res) =>
       res
         .toString()
@@ -164,7 +157,7 @@ async function writeMainMsg(_path: string, str: string) {
   writeFile(path.resolve(_path, `../.gitignore`), '*');
   writeFile(path.resolve(_path, `../.prettierignore`), '*');
   ['index.mjs', 'index.d.ts', 'message.d.ts', 'runtime.d.ts', 'dynamic.d.ts'].forEach((v) =>
-    copyFile(path.resolve(__dirname, './files/', v), path.resolve(_path, `../`, v))
+    copyFile(path.resolve(__dirname, '../files/', v), path.resolve(_path, `../`, v))
   );
 
   await writeFile(path.resolve(_path, `../message.mjs`), eslint_disable + str);

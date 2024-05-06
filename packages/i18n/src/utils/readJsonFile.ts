@@ -2,6 +2,7 @@ import json5 from 'json5';
 import { glob } from 'glob';
 import * as path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { getConfig } from '../config';
 
 const fileSuffix = ['jsonc', 'json5', 'json'].join(','); // 支持多个格式，最先找到的
 
@@ -18,4 +19,24 @@ export async function readJsonFile<T = any>(filePath: string, fileName: string):
   }
   const file_str = (await readFile(file_name)).toString();
   return json5.parse(file_str);
+}
+
+/** 读取 某个语言的所有文件中的数据 */
+export async function readLangFilesToJson<T = any>(lang: string): Promise<T> {
+  const { inputDir, multipleFilesLanguage } = await getConfig();
+  const multipleFiles = multipleFilesLanguage[lang];
+  let allFiles = [lang];
+  if (multipleFiles) {
+    allFiles = allFiles.concat(...multipleFiles);
+  }
+  const file_globs = allFiles.map((fileName) => path.resolve(process.cwd(), inputDir, `${fileName}.{${fileSuffix}}`));
+
+  const AllFilesPaths = await glob(file_globs);
+  const json = (await Promise.all(AllFilesPaths.map((path) => readFile(path)))).reduce((r, v) => {
+    const str = v.toString();
+
+    return { ...r, ...json5.parse(str) };
+  }, {});
+
+  return json as T;
 }

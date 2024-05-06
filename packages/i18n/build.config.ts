@@ -2,15 +2,7 @@ import { defineBuildConfig } from 'unbuild';
 
 export default defineBuildConfig({
   failOnWarn: false,
-  entries: [
-    'src/index',
-    'src/cli',
-    {
-      builder: 'mkdist',
-      input: './src/files',
-      outDir: './libs/files',
-    },
-  ],
+  entries: ['src/index', 'src/cli'],
 
   outDir: 'libs',
   clean: true,

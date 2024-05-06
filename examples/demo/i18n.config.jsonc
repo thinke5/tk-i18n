@@ -1,7 +1,10 @@
 {
-  "language": ["zh", "en"],
+  "language": ["zh", "en", "test"],
+  "multipleFilesLanguage": {
+    "test": ["test/text", "test/pro"]
+  },
   "defaultLanguage": "zh",
   "inputDir": "messages",
-  "outputDir": "./src/i18n"
-  // ,"dynamicLanguage": ["cn"]
+  "outputDir": "./src/i18n",
+  "dynamicLanguage": ["cn"]
 }
